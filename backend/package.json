@@ -1,0 +1,23 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "cors": "^2.8.5",
+    "curl-request": "^1.1.1",
+    "express": "^4.17.1",
+    "fetch": "^1.1.0",
+    "form-data": "^3.0.0",
+    "multer": "^1.4.2",
+    "node-fetch": "^2.6.0",
+    "superagent": "^5.3.1"
+  }
+}
