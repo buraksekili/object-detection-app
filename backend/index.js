@@ -6,9 +6,9 @@ const cors = require("cors");
 const fs = require("fs");
 
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(cors());
-
 app.use(express.static("uploads"));
 
 var storedFilename = "";
@@ -38,7 +38,6 @@ const upload = multer({
     fileFilter,
 });
 
-const port = process.env.PORT || 3000;
 app.get("/", (req, res) => {
     res.send("Hello World!");
 });
@@ -67,6 +66,4 @@ app.post("/send", upload.array("images"), (req, resp) => {
         });
 });
 
-app.listen(port, () => {
-    console.log(`Example app listening at http://localhost:${port}`);
-});
+app.listen(port, () => {});
