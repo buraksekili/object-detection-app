@@ -111,8 +111,9 @@ button:hover {
 
 }
 
-.github {
+.github-text {
     color: black;
+    font-size: 20px;
 }
 
 pre {

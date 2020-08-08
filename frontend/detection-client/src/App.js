@@ -52,8 +52,12 @@ const App = () => {
 
     return (
         <div className="app-container" id="app-container">
-            <a className="github" href="https://github.com/" target="_blank">
-                Source code and description available on Github
+            <a
+                className="github-text"
+                href="https://github.com/buraksekili/Object-Detection"
+                target="_blank"
+            >
+                Description and source code (Github)
             </a>
             <form
                 onSubmit={(event) => {
