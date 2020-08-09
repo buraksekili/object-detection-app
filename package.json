@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/buraksekili/Object-Detection/issues"
   },
-  "homepage": "https://github.com/buraksekili/Object-Detection#readme"
+  "homepage": "https://github.com/buraksekili/Object-Detection#readme",
+  "dependencies": {
+    "aws-sdk": "^2.729.0",
+    "netlify-lambda": "^2.0.1"
+  }
 }
