@@ -4,15 +4,17 @@ const FormData = require("form-data");
 const curl = new (require("curl-request"))();
 const cors = require("cors");
 const fs = require("fs");
+const serverless = require("serverless-http");
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+const router = express.Router();
+app.use("/.netlify/functions/index", router);
+
 app.use(cors());
 app.use(express.static("uploads"));
 
-const router = express.Router();
-app.use('/.netlify/functions/api', router);
 var storedFilename = "";
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -69,3 +71,4 @@ app.post("/send", upload.array("images"), (req, resp) => {
 });
 
 app.listen(port, () => {});
+module.exports.handler = serverless(app);
