@@ -1,10 +1,9 @@
-// hakkinda sayfasi yap
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Loading from "./components/Loading";
 import "./styles/style.css";
 
-const url = "http://127.0.0.1:3000/send";
+const url = "http://161.35.204.135:8080/detections";
 const App = () => {
     const [resJSON, setResJSON] = useState(null);
     const [rawJSON, setRawJSON] = useState(null);
@@ -54,7 +53,7 @@ const App = () => {
         <div className="app-container" id="app-container">
             <a
                 className="github-text"
-                href="https://github.com/buraksekili/Object-Detection"
+                href="https://github.com/buraksekili/Object-Detection-App"
                 target="_blank"
             >
                 Description and source code (Github)
