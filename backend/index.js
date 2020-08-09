@@ -11,6 +11,8 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.static("uploads"));
 
+const router = express.Router();
+app.use('/.netlify/functions/api', router);
 var storedFilename = "";
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
