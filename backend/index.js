@@ -1,16 +1,17 @@
 const express = require("express");
 const multer = require("multer");
 const FormData = require("form-data");
-const curl = new (require("curl-request"))();
+// const curl = new (require("curl-request"))();
 const cors = require("cors");
 const fs = require("fs");
-const serverless = require("serverless-http");
+const ApiUrl = require("./apiUrl");
+const { Curl } = require("node-libcurl");
+
+const curl = new Curl();
+const close = curl.close.bind(curl);
 
 const app = express();
 const port = process.env.PORT || 3000;
-
-const router = express.Router();
-app.use("/.netlify/functions/index", router);
 
 app.use(cors());
 app.use(express.static("uploads"));
@@ -46,29 +47,48 @@ app.get("/", (req, res) => {
     res.send("Hello World!");
 });
 
-const url = "http://161.35.204.135:8080/detections";
 app.post("/send", upload.array("images"), (req, resp) => {
     var formData = new FormData();
-
     var fdata = formData.append("images", req.files[0].path);
-    curl.setMultipartBody([
+    curl.setOpt(Curl.option.URL, ApiUrl);
+    curl.setOpt(Curl.option.HTTPPOST, [
         {
             name: "images",
             file: req.files[0].path,
             type: req.files[0].mimetype,
         },
-    ])
-        .post(url)
-        .then(({ statusCode, body, headers }) => {
-            resp.send(JSON.stringify(body.response[0].detections));
-            fs.unlink("./uploads/" + storedFilename, (err) => {
-                if (err) return console.error("err");
-            });
-        })
-        .catch((e) => {
-            console.log(e);
+    ]);
+    curl.on("end", function (statusCode, body, headers) {
+        const newBody = JSON.parse(body);
+        fs.unlink("./uploads/" + storedFilename, (err) => {
+            if (err) return console.error("err");
         });
+        resp.status(statusCode).send(newBody.response[0].detections);
+    });
+    curl.on("error", function (error) {
+        this.close();
+        resp.send(error);
+    });
+    curl.perform();
+    // curl.setMultipartBody([
+    //     {
+    //         name: "images",
+    //         file: req.files[0].path,
+    //         type: req.files[0].mimetype,
+    //     },
+    // ])
+    //     .post(url)
+    //     .then(({ statusCode, body, headers }) => {
+    //         resp.send(JSON.stringify(body.response[0].detections));
+    //         fs.unlink("./uploads/" + storedFilename, (err) => {
+    //             if (err) return console.error("err");
+    //         });
+    //     })
+    //     .catch((e) => {
+    //         console.log(e);
+    //     });
 });
 
-app.listen(port, () => {});
-module.exports.handler = serverless(app);
+app.listen(port, () => {
+    console.log(`on :${port}`);
+});
