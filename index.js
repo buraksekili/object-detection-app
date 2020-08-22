@@ -4,7 +4,7 @@ const FormData = require("form-data");
 // const curl = new (require("curl-request"))();
 const cors = require("cors");
 const fs = require("fs");
-const ApiUrl = require("./apiUrl");
+// const ApiUrl = require("./apiUrl");
 const { Curl } = require("node-libcurl");
 
 const curl = new Curl();
@@ -53,7 +53,8 @@ if (process.env.NODE_ENV === "production") {
 app.post("/send", upload.array("images"), (req, resp) => {
     var formData = new FormData();
     var fdata = formData.append("images", req.files[0].path);
-    curl.setOpt(Curl.option.URL, ApiUrl);
+    // curl.setOpt(Curl.option.URL, ApiUrl);
+    curl.setOpt(Curl.option.URL, process.env.ApiUrl);
     curl.setOpt(Curl.option.HTTPPOST, [
         {
             name: "images",
