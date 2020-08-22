@@ -45,13 +45,13 @@ const App = () => {
             .catch((err) => {
                 setIsLoading(false);
                 makeBlurBackground(true);
-                console.error(err);
+                console.log(err);
+                console.log("error:", err.message);
             });
     }
 
     return (
         <div className="app-container" id="app-container">
-           
             <form
                 onSubmit={(event) => {
                     event.preventDefault();
