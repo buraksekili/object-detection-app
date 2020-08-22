@@ -6,7 +6,7 @@ const cors = require("cors");
 const fs = require("fs");
 // const ApiUrl = require("./apiUrl");
 const { Curl } = require("node-libcurl");
-
+const path = require("path");
 const curl = new Curl();
 const close = curl.close.bind(curl);
 
@@ -46,7 +46,9 @@ const upload = multer({
 if (process.env.NODE_ENV === "production") {
     app.use(express.static("frontend/build"));
     app.get("*", (req, res) => {
-        res.sendFile(path.resolve(__dirname, "frontend", "build", "index.html"));
+        res.sendFile(
+            path.resolve(__dirname, "frontend", "build", "index.html")
+        );
     });
 }
 
