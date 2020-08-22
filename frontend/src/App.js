@@ -35,7 +35,7 @@ const App = () => {
         const fd = new FormData();
         fd.append("images", inpImg);
         axios
-            .post(url, fd)
+            .post("/send", fd)
             .then((res) => {
                 setIsLoading(false);
                 setResJSON(JSON.stringify(res.data, null, 4));
