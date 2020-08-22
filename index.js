@@ -11,8 +11,9 @@ const curl = new Curl();
 
 const app = express();
 const port = process.env.PORT || 3000;
+require("dotenv").config();
 
-// app.use(cors());
+app.use(cors());
 app.use(express.static("uploads"));
 
 var storedFilename = "";
@@ -21,13 +22,18 @@ const storage = multer.diskStorage({
         cb(null, "./uploads/");
     },
     filename: function (req, file, cb) {
-        storedFilename = new Date().toISOString() + "-" + file.originalname;
+        storedFilename = file.originalname;
+
         cb(null, storedFilename);
     },
 });
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    if (
+        file.mimetype === "image/jpeg" ||
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/jpg"
+    ) {
         cb(null, true);
     } else {
         cb(null, false);
@@ -54,7 +60,6 @@ if (process.env.NODE_ENV === "production") {
 app.post("/send", upload.array("images"), (req, resp) => {
     var formData = new FormData();
     var fdata = formData.append("images", req.files[0].path);
-    // curl.setOpt(Curl.option.URL, ApiUrl);
     curl.setOpt(Curl.option.URL, process.env.ApiUrl);
     curl.setOpt(Curl.option.HTTPPOST, [
         {
