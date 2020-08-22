@@ -1,7 +1,8 @@
 # object-detection-app
 
-![](https://media.giphy.com/media/Ih0IoHInv0x3vm4Nnr/giphy.gif)
+https://bs-detection.herokuapp.com/
 
+![](https://media.giphy.com/media/Ih0IoHInv0x3vm4Nnr/giphy.gif)
 
 This app detects objects in an image and returns detections as JSON by using REST api which uses [yolov3](https://pjreddie.com/darknet/yolo/) with [COCO dataset.](https://cocodataset.org/#home)
 
