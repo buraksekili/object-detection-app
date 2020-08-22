@@ -3,7 +3,6 @@ import axios from "axios";
 import Loading from "./components/Loading";
 import "./styles/style.css";
 
-const url = "http://127.0.0.1:3000/send";
 const App = () => {
     const [resJSON, setResJSON] = useState(null);
     const [rawJSON, setRawJSON] = useState(null);
@@ -45,8 +44,7 @@ const App = () => {
             .catch((err) => {
                 setIsLoading(false);
                 makeBlurBackground(true);
-                console.log(err);
-                console.log("error:", err.message);
+                console.log(err.message);
             });
     }
 
