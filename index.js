@@ -1,10 +1,8 @@
 const express = require("express");
 const multer = require("multer");
 const FormData = require("form-data");
-// const curl = new (require("curl-request"))();
 const cors = require("cors");
 const fs = require("fs");
-// const ApiUrl = require("./apiUrl");
 const { Curl } = require("node-libcurl");
 const path = require("path");
 const curl = new Curl();
@@ -17,6 +15,11 @@ app.use(cors());
 app.use(express.static("uploads"));
 
 var storedFilename = "";
+
+function serverLog(callerFuncName, message) {
+    console.log(`${callerFuncName} => ${message}`);
+}
+
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         cb(null, "./uploads/");
@@ -58,8 +61,8 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.post("/send", upload.array("images"), (req, resp) => {
-    var formData = new FormData();
-    var fdata = formData.append("images", req.files[0].path);
+    serverLog("/send", "started");
+
     curl.setOpt(Curl.option.URL, process.env.ApiUrl);
     curl.setOpt(Curl.option.HTTPPOST, [
         {
@@ -68,35 +71,23 @@ app.post("/send", upload.array("images"), (req, resp) => {
             type: req.files[0].mimetype,
         },
     ]);
+
     curl.on("end", function (statusCode, body, headers) {
         const newBody = JSON.parse(body);
         fs.unlink("./uploads/" + storedFilename, (err) => {
-            if (err) return console.error("err");
+            if (err) {
+                serverLog("fs.unlink", `fs.unlink error: ${err}`);
+                return console.error("err");
+            }
         });
         resp.status(statusCode).send(newBody.response[0].detections);
     });
     curl.on("error", function (error) {
         this.close();
+        serverLog("curl.on", `curl.on error: ${error}`);
         resp.send(error);
     });
     curl.perform();
-    // curl.setMultipartBody([
-    //     {
-    //         name: "images",
-    //         file: req.files[0].path,
-    //         type: req.files[0].mimetype,
-    //     },
-    // ])
-    //     .post(url)
-    //     .then(({ statusCode, body, headers }) => {
-    //         resp.send(JSON.stringify(body.response[0].detections));
-    //         fs.unlink("./uploads/" + storedFilename, (err) => {
-    //             if (err) return console.error("err");
-    //         });
-    //     })
-    //     .catch((e) => {
-    //         console.log(e);
-    //     });
 });
 
 app.listen(port, () => {
