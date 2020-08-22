@@ -6,6 +6,7 @@ const fs = require("fs");
 const { Curl } = require("node-libcurl");
 const path = require("path");
 const curl = new Curl();
+const axios = require("axios");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -63,31 +64,57 @@ if (process.env.NODE_ENV === "production") {
 app.post("/send", upload.array("images"), (req, resp) => {
     serverLog("/send", "started");
 
-    curl.setOpt(Curl.option.URL, process.env.ApiUrl);
-    curl.setOpt(Curl.option.HTTPPOST, [
-        {
-            name: "images",
-            file: req.files[0].path,
-            type: req.files[0].mimetype,
-        },
-    ]);
+    var data = new FormData();
+    data.append("images", fs.createReadStream(req.files[0].path));
 
-    curl.on("end", function (statusCode, body, headers) {
-        const newBody = JSON.parse(body);
-        fs.unlink("./uploads/" + storedFilename, (err) => {
-            if (err) {
-                serverLog("fs.unlink", `fs.unlink error: ${err}`);
-                return console.error("err");
-            }
+    var config = {
+        method: "post",
+        url: process.env.ApiUrl,
+        headers: {
+            ...data.getHeaders(),
+        },
+        data: data,
+    };
+
+    axios(config)
+        .then(function (response) {
+            fs.unlink("./uploads/" + storedFilename, (err) => {
+                if (err) {
+                    serverLog("fs.unlink", `fs.unlink error: ${err}`);
+                    return console.error("err");
+                }
+            });
+            resp.send(response.data.response[0].detections);
+        })
+        .catch(function (error) {
+            console.log(error);
         });
-        resp.status(statusCode).send(newBody.response[0].detections);
-    });
-    curl.on("error", function (error) {
-        this.close();
-        serverLog("curl.on", `curl.on error: ${error}`);
-        resp.send(error);
-    });
-    curl.perform();
+
+    // curl.setOpt(Curl.option.URL, process.env.ApiUrl);
+    // curl.setOpt(Curl.option.HTTPPOST, [
+    //     {
+    //         name: "images",
+    //         file: req.files[0].path,
+    //         type: req.files[0].mimetype,
+    //     },
+    // ]);
+
+    // curl.on("end", function (statusCode, body, headers) {
+    //     const newBody = JSON.parse(body);
+    //     fs.unlink("./uploads/" + storedFilename, (err) => {
+    //         if (err) {
+    //             serverLog("fs.unlink", `fs.unlink error: ${err}`);
+    //             return console.error("err");
+    //         }
+    //     });
+    //     resp.status(statusCode).send(newBody.response[0].detections);
+    // });
+    // curl.on("error", function (error) {
+    //     this.close();
+    //     serverLog("curl.on", `curl.on error: ${error}`);
+    //     resp.send(error);
+    // });
+    // curl.perform();
 });
 
 app.listen(port, () => {
