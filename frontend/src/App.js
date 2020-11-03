@@ -80,7 +80,7 @@ const App = () => {
               }
             }}
           ></input>
-          <label for="file">
+          <label htmlFor="file">
             <Upload /> Select Image{" "}
           </label>
 
