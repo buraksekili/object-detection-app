@@ -1,119 +1,109 @@
-import React, { useState } from "react";
 import axios from "axios";
-import Loading from "./components/Loading";
-import "./styles/style.css";
+import { Box, Button, Grommet } from "grommet";
+import { Upload } from "grommet-icons";
+import React, { useState } from "react";
+import Gallery from "./Gallery";
+import Navbar from "./Navbar";
+import "./style.css";
+
+const theme = {
+  global: {
+    colors: {
+      backgroundColor: "#00739D",
+      buttonColor: "#00C781",
+      nav: "#00C781",
+    },
+  },
+};
 
 const App = () => {
-    const [resJSON, setResJSON] = useState(null);
-    const [rawJSON, setRawJSON] = useState(null);
-    const [inpImg, setInpImg] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [imagePrev, setImagePrev] = useState(null);
+  const [inputImage, setInputImage] = useState(null);
+  const [inputImageURL, setInputImageURL] = useState(null);
+  const [outputImage, setOutputImage] = useState(null);
+  const [detectionJSON, setDetectionJSON] = useState(null);
+  const [isLoading, setIsLoading] = useState(null);
 
-    const downloadFile = async () => {
-        var finalData = JSON.parse(JSON.stringify(rawJSON));
-        var dataStr =
-            "data:text/json;charset=utf-8," +
-            encodeURIComponent(JSON.stringify(finalData));
-        var dlAnchorElem = document.getElementById("download-link");
-        dlAnchorElem.setAttribute("href", dataStr);
-        dlAnchorElem.setAttribute("download", "results.json");
-    };
+  function getDetectionJSON() {
+    const fd = new FormData();
+    fd.append("images", inputImage);
+    axios
+      .post("/send", fd)
+      .then((res) => {
+        setDetectionJSON(res.data);
+        setIsLoading(false);
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        console.log(err.message);
+      });
+  }
 
-    const makeBlurBackground = (reset) => {
-        var elem = document.getElementById("input-prev-img");
+  const getDetectedImage = () => {
+    const fd = new FormData();
+    fd.append("images", inputImage);
 
-        if (reset) {
-            elem.style.removeProperty("filter");
-            return;
-        }
-        elem.style.filter = "blur(4px)";
-    };
+    axios
+      .post("/image", fd, { responseType: "stream" })
+      .then((res) => {
+        getDetectionJSON();
+        setIsLoading(true);
+        setOutputImage(res.data);
+      })
+      .catch((err) => {
+        console.error(err);
+        setIsLoading(false);
+      });
+  };
 
-    function makePostReq() {
-        const fd = new FormData();
-        fd.append("images", inpImg);
-        axios
-            .post("/send", fd)
-            .then((res) => {
-                setIsLoading(false);
-                setResJSON(JSON.stringify(res.data, null, 4));
-                setRawJSON(res.data);
-                makeBlurBackground(true);
-            })
-            .catch((err) => {
-                setIsLoading(false);
-                makeBlurBackground(true);
-                console.log(err.message);
-            });
-    }
+  return (
+    <Grommet full={true} theme={theme} background="backgroundColor">
+      <Navbar />
+      <Box direction="column" pad="medium" justify="center" align="center">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <input
+            type="file"
+            id="file"
+            name="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              setInputImage(e.target.files[0]);
+              try {
+                setInputImageURL(URL.createObjectURL(e.target.files[0]));
+              } catch (error) {
+                setInputImageURL(null);
+                console.error(error);
+              }
+            }}
+          ></input>
+          <label for="file">
+            <Upload /> Select Image{" "}
+          </label>
 
-    return (
-        <div className="app-container" id="app-container">
-            <form
-                onSubmit={(event) => {
-                    event.preventDefault();
-                }}
-            >
-                <input
-                    type="file"
-                    id="file"
-                    name="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => {
-                        setInpImg(e.target.files[0]);
-                        try {
-                            setImagePrev(
-                                URL.createObjectURL(e.target.files[0])
-                            );
-                        } catch (error) {
-                            setImagePrev(null);
-                            console.error(error);
-                        }
-                    }}
-                ></input>
-                <label for="file" id="selector">
-                    Select Image
-                </label>
-                {inpImg && (
-                    <button
-                        onClick={() => {
-                            makeBlurBackground(false);
-                            setIsLoading(true);
-                            makePostReq();
-                        }}
-                    >
-                        UPLOAD
-                    </button>
-                )}
-            </form>
-            <div className="input-prev-div">
-                <img
-                    alt={imagePrev && "inp"}
-                    src={imagePrev}
-                    className="input-prev-img"
-                    id="input-prev-img"
-                ></img>
-            </div>
-            {isLoading ? (
-                <Loading />
-            ) : (
-                resJSON && (
-                    <div class="result">
-                        <a
-                            id="download-link"
-                            href="/"
-                            onClick={() => downloadFile()}
-                        >
-                            Download as JSON
-                        </a>
-                        <pre>{resJSON}</pre>
-                    </div>
-                )
-            )}
-        </div>
-    );
+          {inputImage && (
+            <Button
+              margin={{ left: "medium" }}
+              label="UPLOAD"
+              color="buttonColor"
+              primary
+              onClick={() => {
+                setIsLoading(true);
+                getDetectedImage();
+              }}
+            />
+          )}
+        </form>
+
+        <Gallery inputImageURL={inputImageURL} outputImage={outputImage} />
+        {detectionJSON && <pre>{JSON.stringify(detectionJSON, null, 2)}</pre>}
+        {isLoading && <p>Loading ...</p>}
+      </Box>
+    </Grommet>
+  );
 };
 
 export default App;
