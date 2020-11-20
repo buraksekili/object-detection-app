@@ -18,3 +18,5 @@ The app uses React in client-side and Node.js (Express framework) in server-side
 ## API
 
 The object detection api is Flask API and running on DigitalOcean droplet. It reads images and runs YoloV3 detection model over an image. Then, server returns class and accuracy of the detected objects as JSON response.
+
+![flow](https://user-images.githubusercontent.com/32663655/99792702-85547600-2b38-11eb-833c-e2a8569a227e.jpg)
